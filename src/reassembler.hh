@@ -1,12 +1,17 @@
 #pragma once
 
 #include "byte_stream.hh"
-
+#include <iostream>
+#include <list>
 class Reassembler
 {
 public:
   // Construct Reassembler to write into given ByteStream.
-  explicit Reassembler( ByteStream&& output ) : output_( std::move( output ) ) {}
+  explicit Reassembler( ByteStream&& output ) : output_( std::move( output ) )
+  {
+    capacity_ = output_.writer().available_capacity();
+    std::cout << "start==========\n";
+  }
 
   /*
    * Insert a new substring to be reassembled into a ByteStream.
@@ -42,4 +47,27 @@ public:
 
 private:
   ByteStream output_; // the Reassembler writes to this ByteStream
+  struct slice_view
+  {
+    uint64_t index;
+    std::string_view view;
+  };
+
+  std::list<slice_view> buffer_ {};
+  std::list<uint64_t> last_byte_ {};
+  std::list<std::string> data_ {};
+  uint64_t next_byte_ {};
+  uint64_t capacity_ {};
+  uint64_t pending_ {};
+  uint64_t first_unassemble_ {};
+
+  uint64_t last_byte()
+  {
+    if ( this->last_byte_.empty() ) {
+      return -1;
+    }
+    return this->last_byte_.back();
+  }
+  uint64_t next_byte() { return this->output_.reader().bytes_popped(); }
+  uint64_t byte_pushed() { return this->first_unassemble_; }
 };
