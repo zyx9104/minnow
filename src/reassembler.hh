@@ -1,7 +1,6 @@
 #pragma once
 
 #include "byte_stream.hh"
-#include <iostream>
 #include <list>
 class Reassembler
 {
@@ -10,7 +9,6 @@ public:
   explicit Reassembler( ByteStream&& output ) : output_( std::move( output ) )
   {
     capacity_ = output_.writer().available_capacity();
-    std::cout << "start==========\n";
   }
 
   /*
@@ -51,11 +49,11 @@ private:
   {
     uint64_t index;
     std::string_view view;
-  };
+    const std::string data;
+    };
 
   std::list<slice_view> buffer_ {};
   std::list<uint64_t> last_byte_ {};
-  std::list<std::string> data_ {};
   uint64_t next_byte_ {};
   uint64_t capacity_ {};
   uint64_t pending_ {};
@@ -69,5 +67,4 @@ private:
     return this->last_byte_.back();
   }
   uint64_t next_byte() { return this->output_.reader().bytes_popped(); }
-  uint64_t byte_pushed() { return this->first_unassemble_; }
 };
