@@ -27,4 +27,12 @@ public:
 
 private:
   Reassembler reassembler_;
+  std::optional<Wrap32> zero_point_ {};
+  uint16_t window_size() const
+  {
+    if ( writer().available_capacity() < 65536 ) {
+      return writer().available_capacity();
+    }
+    return 65535;
+  }
 };
